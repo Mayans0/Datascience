@@ -384,4 +384,3 @@ Neg Pred Value (Negative Predictive Value) represents the proportion of true neg
 In summary, all models exhibit similar overall accuracy, but there are trade-offs between sensitivity and specificity. The SVM model has the highest sensitivity but the lowest specificity. The choice of the best machine learning model depends on the specific goals and requirements of the application. If sensitivity is crucial, the SVM model may be preferred, but if a balance between sensitivity and specificity is desired, other models like CART or Random Forest could be more suitable.
  
 
-
