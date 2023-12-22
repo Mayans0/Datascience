@@ -5,19 +5,18 @@ This data science project is dedicated to predicting diabetes using classificati
 Here's an overview of the key steps involved in processing the data:
 
 Data Cleaning:
-
 Removed duplicate rows and checked for any missing data.
+
 Data Randomization:
-
 Randomized the dataset to avoid biases and created a subset for analysis.
+
 Data Splitting:
-
 Divided the data into training and testing sets.
+
 Model Training:
-
 Trained multiple models, including LDA, KNN, CART, and RF.
-Model Testing:
 
+Model Testing:
 Evaluated the performance of the trained models.
 
 # Results
