@@ -1,15 +1,15 @@
 ---
 title: "Project_shiny"
 author: "Retal and Mayan"
-date: "`r Sys.Date()`"
+date: "r format(Sys.Date(), '%Y-%m-%d')"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
 
-```{r}
+# Load necessary libraries
+{r}
 library(shiny)
 library(ggplot2)
 library(reshape2)
@@ -36,36 +36,20 @@ ui <- fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      # Add any input controls or parameters for the Shiny app
+      # Add input controls for user input
+      numericInput("input_age", "Age:", value = 30, min = 1, max = 100),
+      numericInput("input_bmi", "BMI:", value = 25, min = 10, max = 50),
+      selectInput("input_gender", "Gender:", c("Male", "Female")),
+      actionButton("btn_predict", "Predict"),
     ),
     
     mainPanel(
       h3("Introduction"),
-      p("Diabetes is a chronic metabolic disorder characterized by elevated blood sugar levels resulting from the body's inability to produce or effectively utilize insulin. It is a growing global health concern, affecting millions of people worldwide. Diabetes poses significant dangers to individuals, as it can lead to various complications, including heart disease, kidney failure, nerve damage, and blindness. Timely detection and management of diabetes are crucial for preventing these complications and improving the quality of life for those affected."),
-      p("The purpose of this Shiny app is to explore the prediction of diabetes using machine learning techniques. By analyzing a diverse range of patient health data, we can develop models that can accurately predict the risk of diabetes. Early detection and accurate prediction of diabetes risk are essential for effective prevention and management of the disease."),
-      
-      # Add the Shiny app's output elements, such as plots or tables
+      # ... (rest of the code)
+
+      # Display prediction results
       fluidRow(
-        column(width = 6,
-               plotOutput("histogram_plot")),
-        column(width = 6,
-               plotOutput("pie_chart"))
-      ),
-      fluidRow(
-        plotOutput("correlation_plot")
-      ),
-      fluidRow(
-        plotOutput("model_comparison_plot")
-      ),
-      fluidRow(
-        verbatimTextOutput("model_comparison_summary")
-      ),
-      fluidRow(
-        verbatimTextOutput("lda_confusion_matrix"),
-        verbatimTextOutput("knn_confusion_matrix"),
-        verbatimTextOutput("cart_confusion_matrix"),
-        verbatimTextOutput("svm_confusion_matrix"),
-        verbatimTextOutput("rf_confusion_matrix")
+        verbatimTextOutput("prediction_result")
       )
     )
   )
@@ -73,83 +57,46 @@ ui <- fluidPage(
 
 # Define the server code
 server <- function(input, output) {
-  # Preprocess the data
-  preprocessData <- function(data) {
-    # Perform any necessary data preprocessing steps
-    # ...
-    return(data)
-  }
-  
-  # Generate histogram plot
-  output$histogram_plot <- renderPlot({
-    par(mfrow=c(3, 3))
-    for (col in names(diabetes_clean)) {
-      hist(diabetes_clean[[col]], main=col, xlab="Value", col="lightblue", border="black")
-    }
-  })
-  
-  # Generate pie chart
-  output$pie_chart <- renderPlot({
-    labels <- c("Healthy", "Diabetic")
-    counts <- table(diabetes_clean$Diabetes_binary)
-    percentages <- prop.table(counts) * 100
-    
-    pie(percentages, 
-        labels = paste(labels, sprintf("%.1f%%", percentages)), 
-        col = c("skyblue", "lightcoral"), 
-        main = "Distribution of Diabetes",
-        init.angle = 90,
-        border = "white")
-  })
-  
-  # Generate correlation plot
-  output$correlation_plot <- renderPlot({
-    cor_matrix <- cor(diabetes_clean)
-    cor_df <- melt(cor_matrix)
-    
-    ggplot(cor_df, aes(Var2, Var1, fill = value)) +
-      geom_tile() +
-      scale_fill_gradientn(colours = rev(colorRampPalette(c("red", "orange", "yellow"))(100))) +
-      labs(title = "Correlation of Features") +
-      theme_minimal() +
-      theme(axis.text.x = element_text(angle = 90, hjust = 1))
-  })
-  
-  
+  # ... (existing code)
+
   # Perform model training and comparison
   output$model_comparison_plot <- renderPlot({
-    train_data <- preprocessData(diabetes_clean)
-    model_LDA <- train(Diabetes_binary ~ ., data = train_data, method = "lda", trControl = control, metric = metric)
-    model_CART <- train(Diabetes_binary ~ ., data = train_data, method = "rpart", trControl = control, metric = metric)
-    model_KNN <- train(Diabetes_binary ~ ., data = train_data, method = "knn", trControl = control, metric = metric)
-    model_SVM <- train(Diabetes_binary ~ ., data = train_data, method = "svmRadial", trControl = control, metric = metric)
-    model_RF <- train(Diabetes_binary ~ ., data = train_data, method = "rf", trControl = control, metric = metric)
-    
-    model_comparison <- resamples(list(LDA = model_LDA, CART = model_CART, KNN = model_KNN, SVM = model_SVM, RF = model_RF))
-    model_comparison_plot <- dotplot(model_comparison, auto.key = list(columns = 5))
-    print(model_comparison_plot)
+    # ... (existing code)
   })
   
   # Display model comparison summary
   output$model_comparison_summary <- renderPrint({
-    summary(model_comparison)
+    # ... (existing code)
   })
   
   # Generate confusion matrix for LDA model
   output$lda_confusion_matrix <- renderPrint({
-    lda_pred <- predict(model_LDA, test_data)
-    confusionMatrix(lda_pred, test_data$Diabetes_binary)
+    # ... (existing code)
   })
   
-  # Generate confusion matrix for KNN model
-  output$knn_confusion_matrix <- renderPrint({
-    knn_pred <- predict(model_KNN, test_data)
-    confusionMatrix(knn_pred, test_data$Diabetes_binary)
+  # Reactive element for prediction
+  predicted_result <- eventReactive(input$btn_predict, {
+    new_data <- data.frame(Age = input$input_age,
+                           BMI = input$input_bmi,
+                           Gender = input$input_gender)
+    
+    # Preprocess new data (use the same preprocessing as for training data)
+    new_data <- preprocessData(new_data)
+    
+    # Use your preferred model for prediction
+    prediction <- predict(model_LDA, new_data)
+    
+    # Return the prediction result
+    return(prediction)
   })
   
+  # Display prediction result
+  output$prediction_result <- renderText({
+    if (!is.null(predicted_result())) {
+      paste("Prediction: ", predicted_result())
+    }
+  })
 }
 
 # Run the Shiny app
 shinyApp(ui = ui, server = server)
-```
-
